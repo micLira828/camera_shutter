@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Camera Shutter</title>
+	<style>
+	  body{
+	   display:flex;
+	   flex-direction:column;
+	   align-items:center;
+	   justify-content:center;
+	  }
+	  
+
+	  
+	</style>
+</head>
+<body>
+     
+	<canvas id = "stage"></canvas>
+	
+	
+	<script>
+	//get canvas: the html element
+	  const canvas = document.getElementById("stage"),
+	  ctx = canvas.getContext("2d"),
+	  triangle_canvas = document.createElement("canvas"),
+	  triangle_ctx = triangle_canvas.getContext("2d"),
+	  polygon_sides = 10,
+	  vertices = Array(polygon_sides).fill(null),
+	  angle_increment = Math.PI * 2/polygon_sides,
+	  exterior_angle = angle_increment;
+	  
+	  
+       ctx.fillText("Hello World", canvas.width/2, canvas.height/2);
+	  
+	  //The x and y of the center
+	 let center_x,
+	 center_y,
+	 radius = 100,
+	 longestSide;
+	 
+	 debug = true;
+	 
+	 //Function to make the array for the corners
+	 function setVertices() {
+	 
+	 //for all polygon sides....
+	  for (let i = 0; i < polygon_sides; i++){
+	  //X is the cosin of the angle * r + the center x coordinate
+	   const x = center_x + radius * Math.cos(angle_increment * i);
+	   
+	   //Y is the sin  of the angle * r + the center y coordinate
+	   const y = center_y - radius * Math.sin(angle_increment * i);
+	   
+	   //Add an object of x and y to the array
+	   vertices[i] = {x, y};
+	  }
+	 }
+	 
+	 function createTriangle(){
+	 //??? 1:08:46
+	 const gradient = triangle_ctx.createLinearGradient(0, 0, triangle_canvas.width, triangle_canvas.height);
+	   gradient.addColorStop(0, "#f00");
+	   gradient.addColorStop(0.3, "#000");
+	   triangle_ctx.clearRect(0, 0, triangle_canvas.width, triangle_canvas.height);
+	   triangle_ctx.fillStyle = gradient;
+	   //Put the point to the beginning of the canvas
+	   triangle_ctx.moveTo(0,0);
+	   //Then draw a line to the end of the canvas
+	   triangle_ctx.lineTo(triangle_canvas.width,0);
+	   triangle_ctx.lineTo(
+	   //Then draw a line to the next point
+	   //the x coordinate of the point
+	   triangle_canvas.width * Math.cos(exterior_angle),
+	   //the y coordinate of the point
+	   triangle_canvas.height * Math.sin(exterior_angle)
+	   );
+	   
+	   //Close out the shape
+	   triangle_ctx.closePath();
+	   
+	   //Fill the shape
+	   triangle_ctx.fill();
+	   
+	   //put the stroke
+	   triangle_ctx.stroke();
+	 }
+	
+	 function placeTriangle(vertex, i){
+	 
+	  ctx.save();
+	  //Translate triangle to vertex
+	  ctx.translate(vertex.x, vertex.y);
+	  //Rotate it across the circumference
+	  ctx.rotate(-Math.PI/2 - exterior_angle/2 - exterior_angle * i);
+	  ctx.drawImage(triangle_canvas, 0, 0);
+	  ctx.restore();
+	 }
+	 
+	 //Function to draw
+	 function draw(){
+	 ctx.clearRect(0, 0, canvas.width, canvas.height);
+	 vertices.forEach((vertex, i)=>{
+	   placeTriangle(vertex, i);
+	 
+	 });
+	 if (debug){
+	 
+	 ctx.strokeStyle = "rgba(0,0,0,.3)";
+	 ctx.fillStyle = "rgba(0, 0, 0, .3)";
+	 //draw our circle
+	  ctx.beginPath();
+	  
+	  //(x, y, radius, where arc starts, where arc ends)
+	  ctx.arc(center_x, center_y, radius, 0, Math.PI * 2);
+	  
+	  ctx.closePath();
+	  ctx.stroke();
+	  
+	  //draw polygon for each object in the array
+	  vertices.forEach((vertex, i)=>{
+	   ctx.beginPath();
+	   ctx.arc(vertex.x, vertex.y, 10, 0, Math.PI * 2);
+	   ctx.closePath();
+	   ctx.fill();
+	  });
+	 
+	 
+	  ctx.beginPath();
+	 
+	   //Draw Out Polygon Lines
+	  vertices.forEach((vertex, i)=>{
+	  //if its at the beginning...
+	    if(i === 0){
+		//...move to the next vertex
+		  ctx.moveTo(vertex.x, vertex.y);
+		}else{
+		 //...otherwise, draw a line to the next vertex
+		  ctx.lineTo(vertex.x, vertex.y);
+		}
+	 
+	  });
+	  ctx.closePath();
+	  ctx.stroke();}
+	 }
+	 
+	  
+	  //function to make it fluid
+	  function setSize(){
+	    //Get canvas width and height
+		//Make it the width and height of the whole canvas
+	     canvas.width = window.innerWidth;
+	     canvas.height = window.innerHeight;
+		 
+		 //Equations for center x and y coordinates
+		 center_x = canvas.width/2;
+		 center_y = canvas.height/2;
+		 
+		 longestSide = Math.max(canvas.width, canvas.height);
+		 triangle_canvas.width = longestSide;
+		 triangle_canvas.height = longestSide;
+		 
+		   //Call the function to draw a triangle
+	        createTriangle();
+		 
+	  }
+	  
+	  //to initialize everything
+	  function init(){
+	  
+	  /*Q: If function wasn't there, would it still resize?*/
+	  //for resizing to happen right from the getgo
+	  setSize();
+	  
+	  //Call to set the vertexes
+	  setVertices();
+	  
+	  //Call to function to draw
+	  draw();
+	  
+	  
+	  //Add the triangle canvas to the dom
+	  //document.body.appendChild(triangle_canvas);
+	   window.addEventListener("resize", ()=>{
+	    //Set size based on elements after resizing
+	    setSize();
+		
+		//Set the angles in the array
+		setVertices();
+		
+		//Draw everything out
+		draw();
+	   });
+	 
+	    window.addEventListener("pointermove", e =>{
+		
+	      radius = e.x * .75;
+		 setVertices();
+		//Draw everything out
+		draw();
+	   });
+	  
+	  }
+	  init();
+	  
+	 
+	</script>
+</body>
+</html>

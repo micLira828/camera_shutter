@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Add Circle</title>
+	<style>
+	  body{
+	   display:flex;
+	   flex-direction:column;
+	   align-items:center;
+	   justify-content:center;
+	  }
+	  
+	  
+	  
+	  p{
+	   font-size: 1.875rem;
+	   animation: increaseText 5s forwards;
+	   position: fixed;
+	  }
+	  
+	  @keyframes increaseText{
+	   from{
+	    font-size: 1.875rem;
+	   }
+	   to{
+	    font-size: 3.75rem;
+	   }
+	  }
+	  
+	</style>
+</head>
+<body>
+  <p>Hello</p>
+	
+	<script> 
+	var c = document.getElementById("myCanvas");
+    var ctx = c.getContext("2d");
+	
+	c.width = window.innerwidth;
+	c.height = window.innerHeight;
+	
+    ctx.font = "30px Arial";
+    ctx.fillText("Hello World", window.innerWidth/2, window.innerHeight/2);
+	
+	</script>
+</body>
+</html>
